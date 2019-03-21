@@ -25,9 +25,9 @@ module.exports = (config) => {
 			d.className = d.className + ' demo-js';
 		})(document.documentElement);
 	</script>
-</head>
-
-<body>
+	</head>
+	
+	<body>
   <main id="root"></main>
 	<script src="./${demo.name}.js"></script>
 	${shared.dependencies ? `<script src="https://origami-build.ft.com/v2/bundles/js?modules=o-syntax-highlight,${shared.dependencies.toString()}"></script>` : ''}

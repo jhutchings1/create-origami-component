@@ -1,6 +1,8 @@
 const {Command, flags} = require('@oclif/command');
 const path = require('path');
 const fs = require('fs-extra');
+
+const Bundler = require('parcel-bundler');
 const Config = require('../tasks/config');
 const stringCasing = require('../../templates/helpers/string-casing');
 
@@ -17,6 +19,7 @@ class Demo extends Command {
     await this.generateSCSSRc();
     await this.readData();
     await this.buildDemoFiles();
+    await this.buildEntryFile();
     await this.bundlerSetup();
   }
 
@@ -54,6 +57,18 @@ class Demo extends Command {
       let file = await fs.readFile(configPath, 'utf-8');
       return JSON.parse(file);
     } catch (error) {
+      // TODO: handle error
+    }
+  }
+  async buildEntryFile() {
+    let entryFile = require(path.join(__dirname, '../../templates/demo/entry.js'));
+    let destination = path.join(this.cwd, 'demos/tmp');
+    let fileName = 'index.html';
+
+    try {
+      await fs.outputFile(path.join(destination, fileName), entryFile(this.config.demos, this.brand), 'utf-8')
+      await this.generateCSS(config);
+    } catch {
       // TODO: handle error
     }
   }
@@ -108,17 +123,24 @@ class Demo extends Command {
       // TODO: handle error
     }
   }
-  
+
   async bundlerSetup () {
-    const entry = path.join(this.cwd, 'demos/tmp/*.html');
-    const Bundler = require('parcel-bundler');
+    const entry = path.join(this.cwd, 'demos/tmp/index.html');
     const bundle = new Bundler(entry, {
       outDir: 'demos/local',
+      publicUrl: '/index.html',
       cache: false,
       sourceMaps: false, 
       minify: false,
       watch: this.flags.watch
     });
+
+    try {
+      await fs.remove(path.join(this.cwd), 'demos/tmp/');
+      await fs.remove(path.join(this.cwd), 'demos/local/');
+    } catch {
+      // TODO: handle error;
+    }
 
     if (this.flags.serve) {
       await bundle.serve(8999);

@@ -3,6 +3,7 @@ import Sidebar from './sidebar';
 import DemoArea from './demo-area';
 
 import './main.scss';
+import { log } from "util";
 
 class App extends React.PureComponent {
   constructor(props) {
